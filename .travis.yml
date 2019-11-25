@@ -10,10 +10,10 @@ install:
   - wget ${KERNEL_URL}v${KVER}/$ALL_DEB
   - dpkg -x ${ALL_DEB} kernel_source/
   - dpkg -x $(wget --quiet -O - ${KERNEL_URL}v${KVER}/ | grep -o 'href=".*"' | grep headers | grep generic | grep -m1 arm64 | cut -d '"' -f 2) kernel_source/
-  - sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-8 800
+  #- sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-8 800
 
 script:
-  - make ARCH=arm64 KSRC=kernel_source/usr/src/linux-headers-${KVER_BUILD}-generic/ CROSS_COMPILE=aarch64-linux-gnu- CONFIG_PLATFORM_ARM_AARCH64=y CONFIG_PLATFORM_I386_PC=n
+  - make V=1 KSRC=kernel_source/usr/src/linux-headers-${KVER_BUILD}-generic/ CROSS_COMPILE=aarch64-linux-gnu- CONFIG_PLATFORM_ARM_AARCH64=y CONFIG_PLATFORM_I386_PC=n CONFIG_MP_VHT_HW_TX_MODE=n CONFIG_RTL8814A=n
 
 env:
   global:
@@ -25,5 +25,5 @@ matrix:
       addons:
         apt:
           packages:
-            - gcc-8-aarch64-linux-gnu
+            - gcc-aarch64-linux-gnu
       env: KVER=5.3.1
