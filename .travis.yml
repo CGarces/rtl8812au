@@ -1,17 +1,20 @@
 language: c
 compiler: gcc
 sudo: required
-dist: xenial
+dist: bionic
 
-before_install:
+install:
   - export ALL_DEB=$(wget --quiet -O - ${KERNEL_URL}v${KVER}/ | grep -o 'href=".*"' | grep -m1 all | cut -d '"' -f 2)
   - export KVER_BUILD=$(echo $ALL_DEB | cut -d '_' -f 1 | cut -c15-)
-  - wget ${KERNEL_URL}v${KVER}/$(wget --quiet -O - ${KERNEL_URL}v${KVER}/ | grep -o 'href=".*"' | grep headers | grep generic | grep -m1 amd64 | cut -d '"' -f 2)
+  - wget ${KERNEL_URL}v${KVER}/$(wget --quiet -O - ${KERNEL_URL}v${KVER}/ | grep -o 'href=".*"' | grep headers | grep generic | grep -m1 arm64 | cut -d '"' -f 2)
   - wget ${KERNEL_URL}v${KVER}/$ALL_DEB
-  - sudo dpkg -i *.deb
+  - dpkg -x ${ALL_DEB} kernel_source/
+  - dpkg -x $(wget --quiet -O - ${KERNEL_URL}v${KVER}/ | grep -o 'href=".*"' | grep headers | grep generic | grep -m1 arm64 | cut -d '"' -f 2) kernel_source/
+  - sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-8 800
 
 script:
-  - make CC=$COMPILER KVER=$KVER_BUILD-generic
+  - make ARCH=arm64 KSRC=kernel_source/usr/src/linux-headers-${KVER_BUILD}-generic/ CROSS_COMPILE=aarch64-linux-gnu- CONFIG_PLATFORM_ARM_AARCH64=y CONFIG_PLATFORM_I386_PC=n
+
 env:
   global:
     - KERNEL_URL=http://kernel.ubuntu.com/~kernel-ppa/mainline/
@@ -21,66 +24,6 @@ matrix:
     - compiler: gcc
       addons:
         apt:
-          sources:
-            - sourceline: 'ppa:ondrej/nginx-mainline'
           packages:
-            - libssl1.1
-      env: COMPILER=gcc-5 KVER=5.3.11
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - sourceline: 'ppa:ondrej/nginx-mainline'
-          packages:
-            - gcc-6
-            - libssl1.1
-      env: COMPILER=gcc-6 KVER=5.3.11
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - sourceline: 'ppa:ondrej/nginx-mainline'
-          packages:
-            - gcc-7
-            - libssl1.1
-      env: COMPILER=gcc-7 KVER=5.3.11
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - sourceline: 'ppa:ondrej/nginx-mainline'
-          packages:
-            - libssl1.1
-      env: COMPILER=gcc-5 KVER=4.19.67
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - sourceline: 'ppa:ondrej/nginx-mainline'
-          packages:
-            - gcc-6
-            - libssl1.1
-      env: COMPILER=gcc-6 KVER=4.19.67
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - sourceline: 'ppa:ondrej/nginx-mainline'
-          packages:
-            - gcc-7
-            - libssl1.1
-      env: COMPILER=gcc-7 KVER=4.19.67
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - sourceline: 'ppa:ondrej/nginx-mainline'
-          packages:
-            - gcc-7
-            - libssl1.1
-      env: COMPILER=gcc-7 KVER=4.15.18
+            - gcc-8-aarch64-linux-gnu
+      env: KVER=5.3.1
