@@ -34,6 +34,9 @@ jobs:
             - sourceline: "ppa:ubuntu-toolchain-r/test"
           packages:
             - gcc-10
+      before_script:
+        - sudo wget https://raw.githubusercontent.com/torvalds/linux/master/scripts/module.lds.S -O /usr/src/linux-headers-$KVER_BUILD-generic/scripts/module.lds
+        - sudo sed -i '$ d' /usr/src/linux-headers-$KVER_BUILD-generic/scripts/module.lds
       env: COMPILER=gcc-10 KVER=$(curl -s https://www.kernel.org/releases.json | grep 'mainline' -B1 | head -1 | cut -d'"' -f4)
     - addons:
         apt:
@@ -41,14 +44,23 @@ jobs:
             - sourceline: "ppa:ubuntu-toolchain-r/test"
           packages:
             - gcc-9
+      before_script:
+        - sudo wget https://raw.githubusercontent.com/torvalds/linux/master/scripts/module.lds.S -O /usr/src/linux-headers-$KVER_BUILD-generic/scripts/module.lds
+        - sudo sed -i '$ d' /usr/src/linux-headers-$KVER_BUILD-generic/scripts/module.lds
       env: COMPILER=gcc-9 KVER=$(curl -s https://www.kernel.org/releases.json | grep 'mainline' -B1 | head -1 | cut -d'"' -f4)
     - addons:
         apt:
           packages:
             - gcc-8
+      before_script:
+        - sudo wget https://raw.githubusercontent.com/torvalds/linux/master/scripts/module.lds.S -O /usr/src/linux-headers-$KVER_BUILD-generic/scripts/module.lds
+        - sudo sed -i '$ d' /usr/src/linux-headers-$KVER_BUILD-generic/scripts/module.lds
       env: COMPILER=gcc-8 KVER=$(curl -s https://www.kernel.org/releases.json | grep 'mainline' -B1 | head -1 | cut -d'"' -f4)
 
-    - env: COMPILER=gcc-7 KVER=$(curl -s https://www.kernel.org/releases.json | grep 'mainline' -B1 | head -1 | cut -d'"' -f4)
+    - before_script:
+        - sudo wget https://raw.githubusercontent.com/torvalds/linux/master/scripts/module.lds.S -O /usr/src/linux-headers-$KVER_BUILD-generic/scripts/module.lds
+        - sudo sed -i '$ d' /usr/src/linux-headers-$KVER_BUILD-generic/scripts/module.lds
+      env: COMPILER=gcc-7 KVER=$(curl -s https://www.kernel.org/releases.json | grep 'mainline' -B1 | head -1 | cut -d'"' -f4)
     - env: COMPILER=gcc-7 KVER=$(curl -s https://www.kernel.org/releases.json | grep -A1 'latest_stable' | tail -1 | cut -d'"' -f4)
  #Kernels 5.4 with minor versions > 28 are failing on amd64. Not upgrade the minor version without check https://kernel.ubuntu.com/~kernel-ppa/mainline/
     - env: COMPILER=gcc-7 KVER=5.4.28
